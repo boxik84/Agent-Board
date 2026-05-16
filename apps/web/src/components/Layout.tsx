@@ -4,7 +4,10 @@ import { cn } from '@/lib/utils'
 import { useQuery } from '@tanstack/react-query'
 import { api } from '../api/client'
 import { useState, useMemo } from 'react'
-import { BOD_MEMBERS, BodAvatar } from '@/lib/bod'
+import { BOD_MEMBERS } from '@/lib/bod'
+import { useLocation } from 'react-router-dom'
+import { useCompanySettings } from '@/lib/companySettings'
+import { DEMO_AGENTS } from '@/lib/demoAgents'
 import {
   LayoutDashboard,
   Inbox,
@@ -238,6 +241,8 @@ export default function Layout() {
   const navigate = useNavigate()
   const logout = () => { clearToken(); navigate('/login') }
   const [createTaskOpen, setCreateTaskOpen] = useState(false)
+  const location = useLocation()
+  const companySettings = useCompanySettings()
 
   const { data: agents = [] } = useQuery({
     queryKey: ['agents'],
@@ -251,7 +256,9 @@ export default function Layout() {
     refetchInterval: 10000,
   })
 
-  const activeAgents = (agents as any[]).filter((a: any) => a.status !== 'terminated')
+  const rawAgents = (agents as any[]).filter((a: any) => a.status !== 'terminated')
+  // Fall back to demo agents when no real agents are available (e.g. demo mode / no backend)
+  const activeAgents = rawAgents.length > 0 ? rawAgents : DEMO_AGENTS
   const cosAgent = activeAgents.find((a: any) =>
     a.role?.toLowerCase().includes('chief of staff') || a.name?.toLowerCase().includes('chief of staff')
   )
@@ -265,10 +272,14 @@ export default function Layout() {
       <aside className="w-56 flex flex-col flex-shrink-0 border-r border-sidebar-border bg-[linear-gradient(to_bottom,rgba(255,255,255,0.03),transparent_40%),rgba(18,18,22,0.85)] backdrop-blur-md">
         {/* Header */}
         <div className="h-14 flex items-center gap-2.5 px-4 border-b border-sidebar-border flex-shrink-0">
-          <div className="flex items-center justify-center size-7 rounded-lg bg-primary/20 text-primary">
-            <Bot size={15} />
+          <div className="flex items-center justify-center size-7 rounded-lg bg-primary/20 text-primary overflow-hidden flex-shrink-0">
+            {companySettings.logo ? (
+              <img src={companySettings.logo} alt="logo" className="size-7 object-cover" onError={e => { (e.target as HTMLImageElement).style.display = 'none' }} />
+            ) : (
+              <Bot size={15} />
+            )}
           </div>
-          <span className="font-semibold text-sm text-foreground">AgentBoard</span>
+          <span className="font-semibold text-sm text-foreground truncate">{companySettings.name || 'AgentBoard'}</span>
         </div>
 
         {/* Create Task Button */}
@@ -334,7 +345,7 @@ export default function Layout() {
       </aside>
 
       {/* Main content */}
-      <main className="flex-1 overflow-y-auto bg-background">
+      <main key={location.pathname} className="flex-1 overflow-y-auto bg-background">
         <Outlet />
       </main>
 

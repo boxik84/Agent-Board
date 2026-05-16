@@ -6,6 +6,7 @@ import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 import { Circle, Play, Zap } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
+import { DEMO_AGENTS } from '@/lib/demoAgents'
 
 const TABS = [
   { id: 'dashboard', label: 'Dashboard' },
@@ -63,9 +64,10 @@ export default function AgentDetailPage() {
   })
 
   if (isLoading) return <div className="p-8 text-muted-foreground text-sm">Načítavam agenta...</div>
-  if (!agent) return <div className="p-8 text-muted-foreground text-sm">Agent nenájdený</div>
+  const effectiveAgent = agent ?? DEMO_AGENTS.find(d => d.id === id)
+  if (!effectiveAgent) return <div className="p-8 text-muted-foreground text-sm">Agent nenájdený</div>
 
-  const a = agent as any
+  const a = effectiveAgent as any
   const allRuns = runs as any[]
   const agentCosts = (costs as any[]).filter(c => c.agentId === id)
   const agentFiles = files as any[]
