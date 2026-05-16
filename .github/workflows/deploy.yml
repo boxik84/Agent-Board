@@ -65,25 +65,3 @@ jobs:
         uses: actions/deploy-pages@v4
         id: deployment
 
-      - name: Discord notification
-        env:
-          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
-        run: |
-          python3 -c "
-          import urllib.request, json, os
-          payload = {
-            'embeds': [{
-              'title': 'Agent-Board deployed ✅',
-              'description': '''${{ github.event.head_commit.message }}''',
-              'color': 5763719,
-              'fields': [
-                {'name': 'Commit', 'value': '[' + '${{ github.sha }}'[:7] + '](https://github.com/${{ github.repository }}/commit/${{ github.sha }})', 'inline': True},
-                {'name': 'By', 'value': '${{ github.actor }}', 'inline': True},
-                {'name': 'Live', 'value': 'https://boxik84.github.io/Agent-Board/', 'inline': False},
-              ]
-            }]
-          }
-          data = json.dumps(payload).encode()
-          req = urllib.request.Request(os.environ['DISCORD_WEBHOOK'], data=data, headers={'Content-Type': 'application/json'})
-          urllib.request.urlopen(req)
-          "
