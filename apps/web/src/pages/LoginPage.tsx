@@ -11,14 +11,24 @@ import { toast } from 'sonner'
 export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [mode, setMode] = useState<'login' | 'register'>('login')
+  const [mode] = useState<'login' | 'register'>('login')
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
+
+  const DEMO_EMAIL = 'admin@agentboard.ai'
+  const DEMO_PASSWORD = 'admin123'
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     try {
+      // Demo / hardcoded admin login (no backend required)
+      if (email === DEMO_EMAIL && password === DEMO_PASSWORD) {
+        setToken('demo-token-admin')
+        navigate('/')
+        return
+      }
+      // Fallback to real API (local dev)
       const fn = mode === 'login' ? api.auth.login : api.auth.register
       const { token } = await fn(email, password)
       setToken(token)
@@ -74,14 +84,8 @@ export default function LoginPage() {
             </Button>
           </form>
 
-          <p className="mt-4 text-center text-sm text-muted-foreground">
-            {mode === 'login' ? 'Nemáte účet?' : 'Máte účet?'}{' '}
-            <button
-              onClick={() => setMode(m => m === 'login' ? 'register' : 'login')}
-              className="text-primary hover:text-primary/80 font-medium transition-colors"
-            >
-              {mode === 'login' ? 'Registrovať' : 'Prihlásiť sa'}
-            </button>
+          <p className="mt-4 text-center text-xs text-muted-foreground/50">
+            admin@agentboard.ai · admin123
           </p>
         </div>
       </div>
