@@ -1,0 +1,19 @@
+{
+  "name": "agentboard",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "pnpm --parallel --filter './apps/*' dev",
+    "build": "pnpm --filter './packages/*' build && pnpm --filter './apps/*' build",
+    "db:generate": "pnpm --filter db generate",
+    "db:migrate": "pnpm --filter db migrate",
+    "db:studio": "pnpm --filter db studio"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": ["esbuild", "better-sqlite3"]
+  },
+  "engines": {
+    "node": ">=20",
+    "pnpm": ">=9"
+  }
+}
