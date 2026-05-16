@@ -64,3 +64,24 @@ jobs:
       - name: Deploy to GitHub Pages
         uses: actions/deploy-pages@v4
         id: deployment
+
+      - name: Discord notification
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        run: |
+          curl -s -X POST "$DISCORD_WEBHOOK" \
+            -H "Content-Type: application/json" \
+            -d "{
+              \"embeds\": [{
+                \"title\": \"Agent-Board deployed\",
+                \"description\": \"${{ github.event.head_commit.message }}\",
+                \"color\": 5763719,
+                \"fields\": [
+                  { \"name\": \"Commit\", \"value\": \"[\`${{ github.sha }}\`](https://github.com/${{ github.repository }}/commit/${{ github.sha }})\", \"inline\": true },
+                  { \"name\": \"Branch\", \"value\": \"\`${{ github.ref_name }}\`\", \"inline\": true },
+                  { \"name\": \"Live\", \"value\": \"https://boxik84.github.io/Agent-Board/\", \"inline\": false }
+                ],
+                \"footer\": { \"text\": \"${{ github.actor }}\" },
+                \"timestamp\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"
+              }]
+            }"
